@@ -1,4 +1,5 @@
 import time
+import platform
 from typing import List, Optional, Union, Any, Dict, Tuple, Literal
 
 import numpy as np
@@ -440,9 +441,19 @@ class StreamDiffusion:
     def __call__(
         self, x: Union[torch.Tensor, PIL.Image.Image, np.ndarray] = None
     ) -> torch.Tensor:
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-        start.record()
+        # Check if CUDA is available and we're not on macOS
+        is_macos = platform.system() == 'Darwin'
+        use_cuda_timing = torch.cuda.is_available() and not is_macos
+        
+        if use_cuda_timing:
+            # Use CUDA events for timing on CUDA-supported platforms
+            start = torch.cuda.Event(enable_timing=True)
+            end = torch.cuda.Event(enable_timing=True)
+            start.record()
+        else:
+            # Fallback to time.time() for non-CUDA platforms like macOS
+            start_time = time.time()
+            
         if x is not None:
             x = self.image_processor.preprocess(x, self.height, self.width).to(
                 device=self.device, dtype=self.dtype
@@ -462,9 +473,15 @@ class StreamDiffusion:
         x_output = self.decode_image(x_0_pred_out).detach().clone()
 
         self.prev_image_result = x_output
-        end.record()
-        torch.cuda.synchronize()
-        inference_time = start.elapsed_time(end) / 1000
+        
+        if use_cuda_timing:
+            end.record()
+            torch.cuda.synchronize()
+            inference_time = start.elapsed_time(end) / 1000
+        else:
+            # Calculate elapsed time for non-CUDA platforms
+            inference_time = time.time() - start_time
+            
         self.inference_time_ema = 0.9 * self.inference_time_ema + 0.1 * inference_time
         return x_output
 
