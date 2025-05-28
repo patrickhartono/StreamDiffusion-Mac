@@ -6,13 +6,14 @@ from setuptools import find_packages, setup
 
 _deps = [
     "torch",
-    "xformers",
-    "diffusers==0.24.0",
-    "transformers",
-    "accelerate",
+    "xformers;sys_platform != 'darwin'",
+    "diffusers==0.33.1",
+    "transformers==4.35.2",
+    "accelerate==1.7.0",
+    "huggingface_hub==0.32.1",
     "fire",
     "omegaconf",
-    "cuda-python",
+    "cuda-python;sys_platform != 'darwin'",
     "onnx==1.15.0",
     "onnxruntime==1.16.3",
     "protobuf==3.20.2",
@@ -31,6 +32,7 @@ extras = {}
 extras["xformers"] = deps_list("xformers")
 extras["torch"] = deps_list("torch", "accelerate")
 extras["tensorrt"] = deps_list("protobuf", "cuda-python", "onnx", "onnxruntime", "colored")
+extras["macos"] = deps_list("torch", "accelerate")  # macOS-specific extras
 
 extras["dev"] = extras["xformers"] + extras["torch"] + extras["tensorrt"]
 

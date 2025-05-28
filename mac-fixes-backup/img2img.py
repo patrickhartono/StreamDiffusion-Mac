@@ -1,8 +1,6 @@
 import sys
 import os
 
-# Ensure the main StreamDiffusion package is in the path
-# This points to the root directory of the StreamDiffusion project
 sys.path.append(
     os.path.join(
         os.path.dirname(__file__),
@@ -11,10 +9,10 @@ sys.path.append(
     )
 )
 
-# Always import the real StreamDiffusionWrapper, not the placeholder
 from utils.wrapper import StreamDiffusionWrapper
 
 import torch
+
 from config import Args
 from pydantic import BaseModel, Field
 from PIL import Image, ImageDraw
@@ -213,27 +211,17 @@ class Pipeline:
             
             # Try to directly process through StreamDiffusion API
             try:
-                # Debug: check StreamDiffusionWrapper object
-                print(f"StreamDiffusionWrapper attributes: {dir(self.stream)}")
-                
                 # Force use of PIL image directly to avoid tensor conversion issues
                 print(f"Processing with current prompt: '{self.last_prompt}'")
                 # Make a copy of the input image to prevent any modification issues
                 input_image = params.image.copy() 
-                
-                # Debug: print information about the input image
-                print(f"Input image details: Type={type(input_image)}, Size={input_image.size}, Mode={input_image.mode}")
-                
-                # Use the img2img method instead of __call__ to ensure prompt is applied
-                output_image = self.stream.img2img(image=input_image, prompt=self.last_prompt)
+                output_image = self.stream(image=input_image)
                 print(f"Output image processed successfully, type: {type(output_image)}")
                 
                 if output_image is not None:
                     return output_image
             except Exception as e:
                 print(f"Direct processing failed: {e}, trying tensor conversion...")
-                import traceback
-                traceback.print_exc()
             
             # Fallback to tensor conversion if direct approach fails
             import numpy as np
@@ -274,9 +262,3 @@ class Pipeline:
             draw = ImageDraw.Draw(error_img)
             draw.text((10, 10), f"Error: {str(e)[:50]}", fill=(255, 255, 255))
             return error_img
-
-
-try:
-    from huggingface_hub import hf_hub_download
-except ImportError:
-    print("huggingface_hub module not found or outdated. Please update it using 'pip install --upgrade huggingface_hub'.")

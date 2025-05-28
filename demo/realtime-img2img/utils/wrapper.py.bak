@@ -1,0 +1,21 @@
+# utils/wrapper.py
+
+class StreamDiffusionWrapper:
+    def __init__(self, model_id_or_path, use_tiny_vae, device, dtype, t_index_list, frame_buffer_size, **kwargs):
+        print("StreamDiffusionWrapper initialized with the following parameters:")
+        print(f"model_id_or_path: {model_id_or_path}")
+        print(f"use_tiny_vae: {use_tiny_vae}")
+        print(f"device: {device}")
+        print(f"dtype: {dtype}")
+        print(f"t_index_list: {t_index_list}")
+        print(f"frame_buffer_size: {frame_buffer_size}")
+        for key, value in kwargs.items():
+            print(f"{key}: {value}")
+
+    def update_prompt(self, prompt):
+        print(f"Prompt updated to: {prompt}")
+
+    def __call__(self, image):
+        print("Processing image with StreamDiffusionWrapper...")
+        # Placeholder for actual image processing logic
+        return image

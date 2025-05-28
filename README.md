@@ -50,6 +50,16 @@ When images are produced using our proposed StreamDiffusion pipeline in an envir
 |          SD-turbo           |       1        |     106.16     |     93.897     |
 | LCM-LoRA <br>+<br> KohakuV2 |       4        |     38.023     |     37.133     |
 
+## Platform Support
+
+### macOS Support (New!)
+
+StreamDiffusion now supports macOS with Apple Silicon and Intel processors. For macOS installation and usage instructions, see:
+- [macOS Installation Guide](./INSTALL.md#macos-apple-silicon)
+- [Running demos on macOS](./demo/realtime-img2img/MACOS_README.md)
+
+Note: Performance on macOS will be different from the benchmarks above. While not as fast as NVIDIA GPUs with TensorRT, the Apple Silicon version still provides interactive speeds.
+
 Feel free to explore each feature by following the provided links to learn more about StreamDiffusion's capabilities. If you find it helpful, please consider citing our work:
 
 ```bash
@@ -64,6 +74,10 @@ Feel free to explore each feature by following the provided links to learn more 
 ```
 
 ## Installation
+
+### Quick Start
+
+For detailed platform-specific instructions, including macOS installation guide, see our [Installation Guide](./INSTALL.md).
 
 ### Step0: clone this repository
 
@@ -86,7 +100,7 @@ OR
 python -m venv .venv
 # Windows
 .\.venv\Scripts\activate
-# Linux
+# Linux/macOS
 source .venv/bin/activate
 ```
 
@@ -94,19 +108,24 @@ source .venv/bin/activate
 
 Select the appropriate version for your system.
 
-CUDA 11.8
+#### Windows/Linux with NVIDIA GPU:
 
+CUDA 11.8
 ```bash
 pip3 install torch==2.1.0 torchvision==0.16.0 xformers --index-url https://download.pytorch.org/whl/cu118
 ```
 
 CUDA 12.1
-
 ```bash
 pip3 install torch==2.1.0 torchvision==0.16.0 xformers --index-url https://download.pytorch.org/whl/cu121
 ```
 
-details: https://pytorch.org/
+#### macOS (Apple Silicon or Intel):
+```bash
+pip3 install --pre torch torchvision
+```
+
+For more options: https://pytorch.org/
 
 ### Step3: Install StreamDiffusion
 

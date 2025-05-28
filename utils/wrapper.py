@@ -661,3 +661,16 @@ class StreamDiffusionWrapper:
             self.nsfw_fallback_img = Image.new("RGB", (512, 512), (0, 0, 0))
 
         return stream
+
+    def update_prompt(self, prompt: str):
+        """
+        Updates the prompt for the StreamDiffusionWrapper.
+
+        Parameters
+        ----------
+        prompt : str
+            The new prompt to set.
+        """
+        print(f"Prompt updated to: {prompt}")
+        # Placeholder for actual prompt update logic
+        self.prompt = prompt

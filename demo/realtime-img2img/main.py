@@ -25,8 +25,6 @@ from img2img import Pipeline
 mimetypes.add_type("application/javascript", ".js")
 
 THROTTLE = 1.0 / 120
-# logging.basicConfig(level=logging.DEBUG)
-
 
 class App:
     def __init__(self, config: Args, pipeline):
@@ -105,34 +103,68 @@ class App:
         @self.app.get("/api/stream/{user_id}")
         async def stream(user_id: uuid.UUID, request: Request):
             try:
-
+                print(f"Starting stream for user: {user_id}")
                 async def generate():
+                    frame_count = 0
                     while True:
                         last_time = time.time()
                         await self.conn_manager.send_json(
                             user_id, {"status": "send_frame"}
                         )
+                        
                         params = await self.conn_manager.get_latest_data(user_id)
                         if params is None:
+                            print("No params received, waiting...")
+                            # Short sleep to avoid tight loop
+                            await asyncio.sleep(0.1)
                             continue
-                        image = pipeline.predict(params)
-                        if image is None:
+                        
+                        # Debug information about the input image
+                        if hasattr(params, "image") and params.image is not None:
+                            if frame_count % 30 == 0:  # Log every 30 frames to reduce output
+                                print(f"Processing frame {frame_count} with image: {type(params.image)}")
+                        else:
+                            print("No image in params")
+                            await asyncio.sleep(0.1)
                             continue
-                        frame = pil_to_frame(image)
-                        yield frame
-                        if self.args.debug:
-                            print(f"Time taken: {time.time() - last_time}")
-
+                        
+                        # Process the image
+                        try:
+                            image = self.pipeline.predict(params)
+                            if image is None:
+                                print("Pipeline returned None image")
+                                await asyncio.sleep(0.1)
+                                continue
+                                
+                            # Convert to frame and yield
+                            frame = pil_to_frame(image)
+                            yield frame
+                            frame_count += 1
+                            
+                            processing_time = time.time() - last_time
+                            if self.args.debug or frame_count % 30 == 0:
+                                print(f"Frame {frame_count} processed in {processing_time:.3f}s ({1/processing_time:.1f} FPS)")
+                                
+                        except Exception as e:
+                            print(f"Error in stream processing: {e}")
+                            import traceback
+                            traceback.print_exc()
+                            await asyncio.sleep(0.5)  # Wait a bit after error
+                
+                # Set timeout to large value to prevent connection timeout
                 return StreamingResponse(
                     generate(),
                     media_type="multipart/x-mixed-replace;boundary=frame",
-                    headers={"Cache-Control": "no-cache"},
+                    headers={
+                        "Cache-Control": "no-cache, no-store, must-revalidate",
+                        "Pragma": "no-cache",
+                        "Expires": "0",
+                    },
                 )
             except Exception as e:
                 logging.error(f"Streaming Error: {e}, {user_id} ")
                 return HTTPException(status_code=404, detail="User not found")
 
-        # route to setup frontend
         @self.app.get("/api/settings")
         async def settings():
             info_schema = pipeline.Info.schema()
@@ -150,16 +182,22 @@ class App:
                 }
             )
 
-        if not os.path.exists("public"):
-            os.makedirs("public")
+        html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "public/index.html"))
+        if not os.path.exists(html_path):
+            raise RuntimeError(f"HTML file '{html_path}' does not exist. Please run 'npm run build' in frontend directory.")
 
-        self.app.mount(
-            "/", StaticFiles(directory="./frontend/public", html=True), name="public"
-        )
+        self.app.mount("/", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "public"), html=True), name="public")
 
+# Detect if we're on Mac with M1/M2/M3 chip and use MPS if available
+if torch.backends.mps.is_available():
+    device = torch.device("mps")
+    torch_dtype = torch.float16
+    print("Using MPS device for acceleration on Apple Silicon")
+else:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    torch_dtype = torch.float32
+    print(f"Using {device} device")
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-torch_dtype = torch.float16
 pipeline = Pipeline(config, device, torch_dtype)
 app = App(config, pipeline).app
 
