@@ -40,18 +40,6 @@ This is a macOS-specific fork of StreamDiffusion, an innovative diffusion pipeli
    - Interactive img2img pipeline with webcam feed or screen capture
    - Support for prompt-based image manipulation
 
-## macOS Performance
-
-While not as fast as NVIDIA GPUs with TensorRT, this macOS port still provides interactive speeds, especially on newer Apple Silicon hardware:
-
-|            model            | Denoising Step | Device            | Approximate FPS |
-| :-------------------------: | :------------: | :---------------: | :------------: |
-|          SD-turbo           |       1        | M1 Max            |      15-20     |
-|          SD-turbo           |       1        | M2 Pro            |      20-25     |
-|          SD-turbo           |       1        | M3 Max            |      25-30     |
-
-> Note: Performance may vary based on your specific Mac hardware, model settings, and image resolution.
-
 ## Installation
 
 ### Quick Start

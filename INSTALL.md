@@ -7,7 +7,7 @@ This guide provides detailed instructions for installing StreamDiffusion on macO
 - **macOS**: macOS 12.0 (Monterey) or newer recommended
 - **Apple Silicon** (M1/M2/M3/M4) or **Intel-based Mac**
 - **Python**: Version 3.10 recommended
-- **RAM**: 16GB minimum, 32GB recommended for better performance
+- **Memory**: 24GB minimum, 64GB recommended for better performance
 
 ## Installation Steps
 
