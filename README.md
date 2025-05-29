@@ -25,7 +25,7 @@ This is a macOS-specific fork of StreamDiffusion, an innovative diffusion pipeli
 ## macOS-Specific Features
 
 1. **Native macOS Support**
-   - Works on Apple Silicon (M1/M2/M3) and Intel-based Macs
+   - Works on Apple Silicon (M1/M2/M3/m4) and Intel-based Macs
    - Uses Metal Performance Shaders (MPS) for GPU acceleration
 
 2. **Optimized for macOS Performance**
