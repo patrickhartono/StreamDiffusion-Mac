@@ -1,104 +1,155 @@
-# Installation Guide for StreamDiffusion
+# macOS Installation Guide for StreamDiffusion
 
-This guide provides detailed instructions for installing StreamDiffusion on different platforms.
+This guide provides detailed instructions for installing StreamDiffusion on macOS with Apple Silicon (M1/M2/M3) or Intel processors.
 
 ## System Requirements
 
-- **Windows/Linux with NVIDIA GPU**: For full performance with TensorRT acceleration
-- **macOS with Apple Silicon**: Supported with some limitations (no TensorRT)
-- **Python**: Version 3.9+ recommended (3.10 tested and working on all platforms)
+- **macOS**: macOS 12.0 (Monterey) or newer recommended
+- **Apple Silicon** (M1/M2/M3) or **Intel-based Mac**
+- **Python**: Version 3.10 recommended
+- **RAM**: 16GB minimum, 32GB recommended for better performance
 
 ## Installation Steps
 
 ### Step 1: Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/StreamDiffusion.git
-cd StreamDiffusion
+git clone https://github.com/yourusername/StreamDiffusion-Mac.git
+cd StreamDiffusion-Mac
 ```
 
 ### Step 2: Set up Python environment
 
 ```bash
-# Create a new conda environment (recommended)
+# Option 1: Create a new conda environment (recommended)
 conda create -n streamdiffusion python=3.10
 conda activate streamdiffusion
 
-# Or use a venv
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Option 2: Or use a venv
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-### Step 3: Install the package
-
-#### Method A: Install as editable package (recommended for development)
+### Step 3: Install PyTorch with MPS support
 
 ```bash
-# Install the base package with required dependencies
-pip install -e .
+# Install PyTorch with Metal Performance Shaders (MPS) support
+pip install --pre torch torchvision
+```
 
-# Optional: Install with specific extras based on your platform
-# For Windows/Linux with NVIDIA GPU:
-pip install -e ".[tensorrt,xformers]"  
+### Step 4: Install StreamDiffusion
 
-# For macOS:
+```bash
+# Install the package with macOS-specific dependencies
 pip install -e ".[macos]"
+
+# If you encounter dependency conflicts, you can try:
+pip install --upgrade pip
+pip install -e . --no-dependencies
+pip install diffusers==0.33.1 huggingface_hub==0.32.1 accelerate==1.7.0
 ```
 
-#### Method B: Install specific demo dependencies
+### Step 5: Verify installation
 
 ```bash
-# Navigate to the specific demo directory
+# Check if PyTorch has MPS support
+python -c "import torch; print(f'PyTorch version: {torch.__version__}, MPS available: {torch.backends.mps.is_available() if hasattr(torch.backends, \"mps\") else False}')"
+```
+
+## Running the Demos
+
+### Real-time Image-to-Image Demo
+
+```bash
+# Navigate to the demo directory
 cd demo/realtime-img2img
 
-# Install dependencies for that demo
-pip install -r requirements.txt
+# Make the run script executable
+chmod +x run_mac.sh
+
+# Run the demo
+./run_mac.sh
 ```
 
-## Platform-Specific Notes
+Then open your browser at http://localhost:7860
 
-### Windows/Linux (NVIDIA GPU)
+## Advanced Configuration
 
-- Make sure you have the latest NVIDIA drivers installed
-- CUDA 11.8+ is recommended
-- TensorRT acceleration requires a compatible NVIDIA GPU
-- For best performance, install xformers: `pip install xformers`
+### Using TinyVAE for Better Performance
 
-### macOS (Apple Silicon)
+The TinyVAE (TAESD) is strongly recommended for macOS as it significantly improves performance:
 
-- PyTorch with MPS (Metal Performance Shaders) acceleration is required
-- Install PyTorch 2.0+ with MPS support: `pip install --pre torch torchvision`
-- Use the `--acceleration none` parameter with demos
-- Use the `--taesd` parameter to enable TinyVAE for better compatibility
-- For demos, use the provided `run_mac.sh` script when available
+```python
+from diffusers import AutoencoderTiny
+
+# Add this to your code after creating the StreamDiffusion object
+stream.vae = AutoencoderTiny.from_pretrained("madebyollin/taesd").to(device=pipe.device, dtype=pipe.dtype)
+```
+
+When running demos, always use the `--taesd` flag:
+
+```bash
+python main.py --taesd --acceleration none
+```
+
+### Optimizing t_index_list Values for macOS
+
+On macOS, it's recommended to use lower t_index values than the defaults:
+
+```python
+# Good values for macOS
+stream = StreamDiffusion(
+    pipe,
+    t_index_list=[15, 25],  # Lower values work better on macOS
+    torch_dtype=torch.float16,
+)
+```
+
+## Troubleshooting
 
 ### Common Issues
 
-1. **Dependency Conflicts**: If you encounter dependency conflicts:
+1. **IndexError with t_index_list**: 
+   - On macOS, ensure t_index values are below 30 (e.g., [15, 25])
+   - Example error: `IndexError: index out of bounds`
+   - Solution: Modify t_index_list in your code or in the demo's img2img.py file
+
+2. **MPS out of memory error**:
+   - Error: `RuntimeError: MPS backend out of memory`
+   - Solutions:
+     - Reduce batch size or image dimensions
+     - Close other GPU-intensive applications
+     - Try using SD-Turbo instead of larger models
+     - Restart your Mac to clear GPU memory
+
+3. **ImportError with update_prompt**:
+   - Error: `AttributeError: 'StreamDiffusionWrapper' object has no attribute 'update_prompt'`
+   - This has been fixed in this fork by adding the `update_prompt` method 
+   - Ensure you're using the correct StreamDiffusionWrapper implementation
+
+4. **Slow performance**:
+   - Use the TinyVAE (`--taesd` flag)
+   - Lower the resolution in the UI settings
+   - Try using SD-Turbo model which is faster than other models
+   - Ensure your Mac is plugged in and not in battery-saving mode
+
+5. **Frontend issues**:
+   - If the web interface doesn't load, ensure the frontend is built:
    ```bash
-   pip install --upgrade pip
-   pip install -e . --no-dependencies
-   pip install diffusers==0.33.1 huggingface_hub==0.32.1 accelerate==1.7.0
+   cd demo/realtime-img2img/frontend
+   npm i
+   npm run build
    ```
 
-2. **ImportError with update_prompt**: Ensure you're using the correct StreamDiffusionWrapper implementation:
-   ```bash
-   # Check import path in your demo's img2img.py or similar file
-   # Make sure it's importing from main project instead of demo placeholder
-   ```
+### Debug Mode
 
-3. **IndexError with t_index_list**: On macOS, ensure t_index values are below 30 (e.g., [15, 25])
-
-## Running the Demo
-
-After installation, you can run the demo with:
+To see detailed error messages, add the `--debug` flag:
 
 ```bash
-# For Windows/Linux with NVIDIA GPU:
-python main.py --acceleration tensorrt
-
-# For macOS:
 python main.py --taesd --acceleration none --debug
+```
+
+For more detailed troubleshooting, see the [macOS-specific demo README](./demo/realtime-img2img/MACOS_README.md).
 # Or use the provided script:
 ./run_mac.sh
 ```

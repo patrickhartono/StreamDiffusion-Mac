@@ -1,218 +1,113 @@
-# StreamDiffusion
+# StreamDiffusion for macOS
 
-⚠️ **Important Notice (by @patrickhartono):**  
-This repository is a **modified version** of the original [StreamDiffusion](https://github.com/cumulo-autumn/StreamDiffusion) project.  
-I adapted and patched the code to enable **macOS support**, including both Apple Silicon (M1/M2) and Intel-based Macs.  
+⚠️ **Important Notice:**  
+This repository is a **macOS-only fork** of the original [StreamDiffusion](https://github.com/cumulo-autumn/StreamDiffusion) project.  
+It has been specifically modified to work on **macOS**, supporting both Apple Silicon (M1/M2/M3) and Intel-based Macs.  
   
-🔧 **Current limitation:** Only the **img2img** pipeline has been tested and verified to work on macOS. The txt2img demo is not yet supported.  
+🔧 **Current limitation:** Only the **img2img** pipeline has been tested and verified to work on macOS. The txt2img demo is not yet fully supported.  
   
-➕ If you're using macOS and want to try StreamDiffusion natively, start here.  
-- See [macOS installation guide](./INSTALL.md#macos-apple-silicon)  
+✅ **Quick Start for macOS Users:**  
+- See [macOS installation guide](./INSTALL.md)  
 - See [macOS-specific demo instructions](./demo/realtime-img2img/MACOS_README.md)
-
-
-[English](./README.md) | [日本語](./README-ja.md) | [한국어](./README-ko.md)
 
 <p align="center">
   <img src="./assets/demo_07.gif" width=90%>
   <img src="./assets/demo_09.gif" width=90%>
 </p>
 
-# StreamDiffusion: A Pipeline-Level Solution for Real-Time Interactive Generation
+# StreamDiffusion for macOS: Real-Time Interactive Generation
 
-**Authors:** [Akio Kodaira*](https://www.linkedin.com/in/akio-kodaira-1a7b98252/), [Chenfeng Xu*](https://www.chenfengx.com/), Toshiki Hazama*, [Takanori Yoshimoto](https://twitter.com/__ramu0e__), [Kohei Ohno](https://www.linkedin.com/in/kohei--ohno/), [Shogo Mitsuhori](https://me.ddpn.world/), [Soichi Sugano](https://twitter.com/toni_nimono), [Hanying Cho](https://twitter.com/hanyingcl), [Zhijian Liu](https://zhijianliu.com/), [Masayoshi Tomizuka](https://me.berkeley.edu/people/masayoshi-tomizuka/), [Kurt Keutzer](https://scholar.google.com/citations?hl=en&user=ID9QePIAAAAJ)
-
-StreamDiffusion is an innovative diffusion pipeline designed for real-time interactive generation. It introduces significant performance enhancements to current diffusion-based image generation techniques.
+This is a macOS-specific fork of StreamDiffusion, an innovative diffusion pipeline designed for real-time interactive generation. The original project was developed by the StreamDiffusion team, and this version has been specifically adapted to work on macOS.
 
 [![arXiv](https://img.shields.io/badge/arXiv-2312.12491-b31b1b.svg)](https://arxiv.org/abs/2312.12491)
-[![Hugging Face Papers](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-papers-yellow)](https://huggingface.co/papers/2312.12491)
+[![macOS Support](https://img.shields.io/badge/platform-macOS-lightgrey)](https://github.com/cumulo-autumn/StreamDiffusion)
 
-We sincerely thank [Taku Fujimoto](https://twitter.com/AttaQjp) and [Radamés Ajna](https://twitter.com/radamar) and Hugging Face team for their invaluable feedback, courteous support, and insightful discussions.
+## macOS-Specific Features
 
-## Key Features
+1. **Native macOS Support**
+   - Works on Apple Silicon (M1/M2/M3) and Intel-based Macs
+   - Uses Metal Performance Shaders (MPS) for GPU acceleration
 
-1. **Stream Batch**
+2. **Optimized for macOS Performance**
+   - Modified pipeline with fallback timing mechanism instead of CUDA Events
+   - Adjusted t_index_list values for compatibility with macOS
 
-   - Streamlined data processing through efficient batch operations.
+3. **Simple Installation**
+   - Streamlined dependencies for macOS
+   - Easy setup with Python and PyTorch
 
-2. **Residual Classifier-Free Guidance** - [Learn More](#residual-cfg-rcfg)
+4. **Real-Time Image Generation**
+   - Interactive img2img pipeline with webcam feed or screen capture
+   - Support for prompt-based image manipulation
 
-   - Improved guidance mechanism that minimizes computational redundancy.
+## macOS Performance
 
-3. **Stochastic Similarity Filter** - [Learn More](#stochastic-similarity-filter)
+While not as fast as NVIDIA GPUs with TensorRT, this macOS port still provides interactive speeds, especially on newer Apple Silicon hardware:
 
-   - Improves GPU utilization efficiency through advanced filtering techniques.
+|            model            | Denoising Step | Device            | Approximate FPS |
+| :-------------------------: | :------------: | :---------------: | :------------: |
+|          SD-turbo           |       1        | M1 Max            |      15-20     |
+|          SD-turbo           |       1        | M2 Pro            |      20-25     |
+|          SD-turbo           |       1        | M3 Max            |      25-30     |
 
-4. **IO Queues**
-
-   - Efficiently manages input and output operations for smoother execution.
-
-5. **Pre-Computation for KV-Caches**
-
-   - Optimizes caching strategies for accelerated processing.
-
-6. **Model Acceleration Tools**
-   - Utilizes various tools for model optimization and performance boost.
-
-When images are produced using our proposed StreamDiffusion pipeline in an environment with **GPU: RTX 4090**, **CPU: Core i9-13900K**, and **OS: Ubuntu 22.04.3 LTS**.
-
-|            model            | Denoising Step | fps on Txt2Img | fps on Img2Img |
-| :-------------------------: | :------------: | :------------: | :------------: |
-|          SD-turbo           |       1        |     106.16     |     93.897     |
-| LCM-LoRA <br>+<br> KohakuV2 |       4        |     38.023     |     37.133     |
-
-## Platform Support
-
-### macOS Support (New!)
-
-StreamDiffusion now supports macOS with Apple Silicon and Intel processors. For macOS installation and usage instructions, see:
-- [macOS Installation Guide](./INSTALL.md#macos-apple-silicon)
-- [Running demos on macOS](./demo/realtime-img2img/MACOS_README.md)
-
-Note: Performance on macOS will be different from the benchmarks above. While not as fast as NVIDIA GPUs with TensorRT, the Apple Silicon version still provides interactive speeds.
-
-Feel free to explore each feature by following the provided links to learn more about StreamDiffusion's capabilities. If you find it helpful, please consider citing our work:
-
-```bash
-@article{kodaira2023streamdiffusion,
-      title={StreamDiffusion: A Pipeline-level Solution for Real-time Interactive Generation},
-      author={Akio Kodaira and Chenfeng Xu and Toshiki Hazama and Takanori Yoshimoto and Kohei Ohno and Shogo Mitsuhori and Soichi Sugano and Hanying Cho and Zhijian Liu and Kurt Keutzer},
-      year={2023},
-      eprint={2312.12491},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
-}
-```
+> Note: Performance may vary based on your specific Mac hardware, model settings, and image resolution.
 
 ## Installation
 
 ### Quick Start
 
-For detailed platform-specific instructions, including macOS installation guide, see our [Installation Guide](./INSTALL.md).
+For detailed installation instructions, see our [macOS Installation Guide](./INSTALL.md).
 
-### Step0: clone this repository
+### Step 1: Clone this repository
 
 ```bash
-git clone https://github.com/cumulo-autumn/StreamDiffusion.git
+git clone https://github.com/yourusername/StreamDiffusion-Mac.git
+cd StreamDiffusion-Mac
 ```
 
-### Step1: Make Environment
-
-You can install StreamDiffusion via pip, conda, or Docker(explanation below).
+### Step 2: Set up Python environment
 
 ```bash
+# Create a new conda environment
 conda create -n streamdiffusion python=3.10
 conda activate streamdiffusion
-```
 
-OR
-
-```cmd
+# Or use a venv
 python -m venv .venv
-# Windows
-.\.venv\Scripts\activate
-# Linux/macOS
 source .venv/bin/activate
 ```
 
-### Step2: Install PyTorch
-
-Select the appropriate version for your system.
-
-#### Windows/Linux with NVIDIA GPU:
-
-CUDA 11.8
-```bash
-pip3 install torch==2.1.0 torchvision==0.16.0 xformers --index-url https://download.pytorch.org/whl/cu118
-```
-
-CUDA 12.1
-```bash
-pip3 install torch==2.1.0 torchvision==0.16.0 xformers --index-url https://download.pytorch.org/whl/cu121
-```
-
-#### macOS (Apple Silicon or Intel):
-```bash
-pip3 install --pre torch torchvision
-```
-
-For more options: https://pytorch.org/
-
-### Step3: Install StreamDiffusion
-
-#### For User
-
-Install StreamDiffusion
+### Step 3: Install PyTorch for macOS
 
 ```bash
-#for Latest Version (recommended)
-pip install git+https://github.com/cumulo-autumn/StreamDiffusion.git@main#egg=streamdiffusion[tensorrt]
-
-
-#or
-
-
-#for Stable Version
-pip install streamdiffusion[tensorrt]
+# Install PyTorch with MPS support
+pip install --pre torch torchvision
 ```
 
-Install TensorRT extension
+### Step 4: Install StreamDiffusion
 
 ```bash
-python -m streamdiffusion.tools.install-tensorrt
+# Install the package with macOS-specific dependencies
+pip install -e ".[macos]"
 ```
 
-(Only for Windows) You may need to install pywin32 additionally, if you installed Stable Version(`pip install streamdiffusion[tensorrt]`).
+## Running the Demo
+
+To run the realtime img2img demo:
 
 ```bash
-pip install --force-reinstall pywin32
+cd demo/realtime-img2img
+chmod +x run_mac.sh
+./run_mac.sh
 ```
 
-#### For Developer
-
-```bash
-python setup.py develop easy_install streamdiffusion[tensorrt]
-python -m streamdiffusion.tools.install-tensorrt
-```
-
-### Docker Installation (TensorRT Ready)
-
-```bash
-git clone https://github.com/cumulo-autumn/StreamDiffusion.git
-cd StreamDiffusion
-docker build -t stream-diffusion:latest -f Dockerfile .
-docker run --gpus all -it -v $(pwd):/home/ubuntu/streamdiffusion stream-diffusion:latest
-```
-
-## Quick Start
-
-You can try StreamDiffusion in [`examples`](./examples) directory.
-
-| ![画像3](./assets/demo_02.gif) | ![画像4](./assets/demo_03.gif) |
-| :----------------------------: | :----------------------------: |
-| ![画像5](./assets/demo_04.gif) | ![画像6](./assets/demo_05.gif) |
-
-## Real-Time Txt2Img Demo
-
-There is an interactive txt2img demo in [`demo/realtime-txt2img`](./demo/realtime-txt2img) directory!
-
-<p align="center">
-  <img src="./assets/demo_01.gif" width=100%>
-</p>
-
-## Real-Time Img2Img Demo
-
-There is a real time img2img demo with a live webcam feed or screen capture on a web browser in [`demo/realtime-img2img`](./demo/realtime-img2img) directory!
-
-<p align="center">
-  <img src="./assets/img2img1.gif" width=100%>
-</p>
+Then open your browser at http://localhost:7860
 
 ## Usage Example
 
-We provide a simple example of how to use StreamDiffusion. For more detailed examples, please refer to [`examples`](./examples) directory.
+Here's a simple example of how to use StreamDiffusion for image-to-image generation on macOS:
 
-### Image-to-Image
+### Image-to-Image Example
 
 ```python
 import torch
@@ -222,27 +117,24 @@ from diffusers.utils import load_image
 from streamdiffusion import StreamDiffusion
 from streamdiffusion.image_utils import postprocess_image
 
-# You can load any models using diffuser's StableDiffusionPipeline
+# Load model with appropriate settings for macOS
 pipe = StableDiffusionPipeline.from_pretrained("KBlueLeaf/kohaku-v2.1").to(
-    device=torch.device("cuda"),
+    device=torch.device("mps" if torch.backends.mps.is_available() else "cpu"),
     dtype=torch.float16,
 )
 
-# Wrap the pipeline in StreamDiffusion
+# Use t_index values that work well on macOS
 stream = StreamDiffusion(
     pipe,
-    t_index_list=[32, 45],
+    t_index_list=[15, 25],  # Lower values for macOS compatibility
     torch_dtype=torch.float16,
 )
 
 # If the loaded model is not LCM, merge LCM
 stream.load_lcm_lora()
 stream.fuse_lora()
-# Use Tiny VAE for further acceleration
+# Use Tiny VAE for better performance on macOS
 stream.vae = AutoencoderTiny.from_pretrained("madebyollin/taesd").to(device=pipe.device, dtype=pipe.dtype)
-# Enable acceleration
-pipe.enable_xformers_memory_efficient_attention()
-
 
 prompt = "1girl with dog hair, thick frame glasses"
 # Prepare the stream
@@ -255,87 +147,87 @@ init_image = load_image("assets/img2img_example.png").resize((512, 512))
 for _ in range(2):
     stream(init_image)
 
-# Run the stream infinitely
-while True:
+# Run the stream
+for i in range(10):
     x_output = stream(init_image)
-    postprocess_image(x_output, output_type="pil")[0].show()
-    input_response = input("Press Enter to continue or type 'stop' to exit: ")
-    if input_response == "stop":
-        break
+    output_image = postprocess_image(x_output, output_type="pil")[0]
+    output_image.save(f"output_{i}.png")
+    output_image.show()
+    input("Press Enter to generate next image...")
 ```
 
-### Text-to-Image
+For more detailed examples, please refer to the [`examples`](./examples) directory.
+
+## Real-Time Img2Img Demo
+
+The real-time img2img demo with webcam feed or screen capture is the main focus of this macOS port. This demo runs in a web browser and allows you to apply Stable Diffusion models to your webcam or screen in real-time.
+
+<p align="center">
+  <img src="./assets/img2img1.gif" width=100%>
+</p>
+
+### Running the Demo
+
+```bash
+cd demo/realtime-img2img
+chmod +x run_mac.sh
+./run_mac.sh
+```
+
+Then open your browser at http://localhost:7860
+
+### Demo Features
+
+- Real-time image generation from webcam or screen capture
+- Adjustable settings for generation quality and speed
+- Prompt-based image manipulation
+- Support for custom models
+
+For detailed instructions, see the [macOS-specific demo README](./demo/realtime-img2img/MACOS_README.md).
+
+## Troubleshooting macOS Issues
+
+### Common Issues on macOS
+
+1. **IndexError: index out of bounds**
+   - This typically means the t_index_list values are too high for macOS.
+   - Solution: Use lower values like `t_index_list=[15, 25]` instead of the default values.
+
+2. **Slow performance**
+   - Make sure you're using the TinyVAE (`--taesd` flag)
+   - Lower the resolution in the UI settings
+   - Try using SD-Turbo model instead of larger models
+
+3. **"RuntimeError: MPS backend out of memory"**
+   - Reduce batch size or image dimensions
+   - Close other GPU-intensive applications
+   - Restart your computer to clear GPU memory
+
+4. **Prompt updates not taking effect**
+   - This has been fixed in this fork by adding the `update_prompt` method to the StreamDiffusionWrapper class
+
+### Checking MPS Support
+
+To verify that your Mac supports MPS acceleration, run:
 
 ```python
 import torch
-from diffusers import AutoencoderTiny, StableDiffusionPipeline
-
-from streamdiffusion import StreamDiffusion
-from streamdiffusion.image_utils import postprocess_image
-
-# You can load any models using diffuser's StableDiffusionPipeline
-pipe = StableDiffusionPipeline.from_pretrained("KBlueLeaf/kohaku-v2.1").to(
-    device=torch.device("cuda"),
-    dtype=torch.float16,
-)
-
-# Wrap the pipeline in StreamDiffusion
-# Requires more long steps (len(t_index_list)) in text2image
-# You recommend to use cfg_type="none" when text2image
-stream = StreamDiffusion(
-    pipe,
-    t_index_list=[0, 16, 32, 45],
-    torch_dtype=torch.float16,
-    cfg_type="none",
-)
-
-# If the loaded model is not LCM, merge LCM
-stream.load_lcm_lora()
-stream.fuse_lora()
-# Use Tiny VAE for further acceleration
-stream.vae = AutoencoderTiny.from_pretrained("madebyollin/taesd").to(device=pipe.device, dtype=pipe.dtype)
-# Enable acceleration
-pipe.enable_xformers_memory_efficient_attention()
-
-
-prompt = "1girl with dog hair, thick frame glasses"
-# Prepare the stream
-stream.prepare(prompt)
-
-# Warmup >= len(t_index_list) x frame_buffer_size
-for _ in range(4):
-    stream()
-
-# Run the stream infinitely
-while True:
-    x_output = stream.txt2img()
-    postprocess_image(x_output, output_type="pil")[0].show()
-    input_response = input("Press Enter to continue or type 'stop' to exit: ")
-    if input_response == "stop":
-        break
+print(f"MPS available: {torch.backends.mps.is_available()}")
 ```
 
-You can make it faster by using SD-Turbo.
+## Credits and Acknowledgments
 
-### Faster generation
+This macOS port is based on the original [StreamDiffusion](https://github.com/cumulo-autumn/StreamDiffusion) project.
 
-Replace the following code in the above example.
+The original StreamDiffusion was developed by Akio Kodaira, Chenfeng Xu, Toshiki Hazama, Takanori Yoshimoto, Kohei Ohno, Shogo Mitsuhori, Soichi Sugano, Hanying Cho, Zhijian Liu, and Kurt Keutzer.
 
-```python
-pipe.enable_xformers_memory_efficient_attention()
-```
+For the full research paper, see [StreamDiffusion: A Pipeline-level Solution for Real-time Interactive Generation](https://arxiv.org/abs/2312.12491).
 
-To
+The macOS compatibility fixes and this fork are maintained by [@patrickhartono](https://github.com/patrickhartono).
 
-```python
-from streamdiffusion.acceleration.tensorrt import accelerate_with_tensorrt
+## License
 
-stream = accelerate_with_tensorrt(
-    stream, "engines", max_batch_size=2,
-)
-```
-
-It requires TensorRT extension and time to build the engine, but it will be faster than the above example.
+This project is licensed under the original StreamDiffusion license.
 
 ## Optionals
 

@@ -182,11 +182,11 @@ class App:
                 }
             )
 
-        html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "public/index.html"))
+        html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "frontend/public/index.html"))
         if not os.path.exists(html_path):
             raise RuntimeError(f"HTML file '{html_path}' does not exist. Please run 'npm run build' in frontend directory.")
 
-        self.app.mount("/", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "public"), html=True), name="public")
+        self.app.mount("/", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "frontend/public"), html=True), name="public")
 
 # Detect if we're on Mac with M1/M2/M3 chip and use MPS if available
 if torch.backends.mps.is_available():
