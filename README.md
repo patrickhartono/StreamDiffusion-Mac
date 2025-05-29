@@ -9,6 +9,7 @@ It has been specifically modified to work on **macOS**, supporting both Apple Si
 ✅ **Quick Start for macOS Users:**  
 - See [macOS installation guide](./INSTALL.md)  
 - See [macOS-specific demo instructions](./demo/realtime-img2img/MACOS_README.md)
+- See [Troubleshooting Guide](./docs/TROUBLESHOOTING.md) for common issues
 
 <p align="center">
   <img src="./assets/demo_07.gif" width=90%>

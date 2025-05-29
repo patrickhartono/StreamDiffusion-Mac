@@ -36,7 +36,7 @@ def screen(
             img = sct.grab(monitor)
             img = PIL.Image.frombytes("RGB", img.size, img.bgra, "raw", "BGRX")
             img.resize((height, width))
-            inputs.append(pil2tensor(img))
+            inputs.append(pil2tensor(img, range=(0, 1)))
     print('exit : screen')
 def dummy_screen(
         width: int,

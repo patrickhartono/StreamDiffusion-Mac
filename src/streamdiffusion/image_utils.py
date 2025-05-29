@@ -76,19 +76,21 @@ def postprocess_image(
 
 
 def process_image(
-    image_pil: PIL.Image.Image, range: Tuple[int, int] = (-1, 1)
+    image_pil: PIL.Image.Image, range: Tuple[int, int] = (0, 1)
 ) -> Tuple[torch.Tensor, PIL.Image.Image]:
     image = torchvision.transforms.ToTensor()(image_pil)
     r_min, r_max = range[0], range[1]
-    image = image * (r_max - r_min) + r_min
+    # ToTensor already returns values in [0, 1], only rescale if needed
+    if (r_min, r_max) != (0, 1):
+        image = image * (r_max - r_min) + r_min
     return image[None, ...], image_pil
 
 
-def pil2tensor(image_pil: PIL.Image.Image) -> torch.Tensor:
+def pil2tensor(image_pil: PIL.Image.Image, range: Tuple[int, int] = (0, 1)) -> torch.Tensor:
     height = image_pil.height
     width = image_pil.width
     imgs = []
-    img, _ = process_image(image_pil)
+    img, _ = process_image(image_pil, range=range)
     imgs.append(img)
     imgs = torch.vstack(imgs)
     images = torch.nn.functional.interpolate(
