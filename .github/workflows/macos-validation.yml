@@ -1,0 +1,79 @@
+name: macOS Validation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  validate-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --pre torch torchvision
+        pip install -e ".[macos]"
+    
+    - name: Verify PyTorch MPS support
+      run: |
+        python -c "import torch; print(f'PyTorch version: {torch.__version__}, MPS available: {torch.backends.mps.is_available()}')"
+    
+    - name: Validate module imports
+      run: |
+        python -c "from streamdiffusion import StreamDiffusion; print('StreamDiffusion imported successfully')"
+    
+    - name: Install demo dependencies
+      run: |
+        cd demo/realtime-img2img
+        pip install -r requirements.txt
+        cd frontend
+        npm i
+        npm run build
+    
+    - name: Test basic functionality
+      run: |
+        python -c "
+import torch
+from diffusers import AutoencoderTiny, StableDiffusionPipeline
+from PIL import Image
+import numpy as np
+
+from streamdiffusion import StreamDiffusion
+
+# Create test image
+test_img = Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8))
+
+# Test minimal initialization
+print('Initializing pipeline...')
+pipe = StableDiffusionPipeline.from_pretrained('stabilityai/sd-turbo').to(
+    device=torch.device('mps' if torch.backends.mps.is_available() else 'cpu'),
+    dtype=torch.float16
+)
+
+print('Initializing StreamDiffusion...')
+stream = StreamDiffusion(
+    pipe,
+    t_index_list=[15, 25],
+    torch_dtype=torch.float16
+)
+
+print('Setting up TinyVAE...')
+stream.vae = AutoencoderTiny.from_pretrained('madebyollin/taesd').to(device=pipe.device, dtype=pipe.dtype)
+
+print('Setting up prompt...')
+prompt = 'test prompt'
+stream.prepare(prompt)
+
+print('Validation successful!')
+        "

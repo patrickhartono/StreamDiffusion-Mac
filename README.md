@@ -24,7 +24,7 @@ This is a macOS-specific fork of StreamDiffusion, an innovative diffusion pipeli
 ## macOS-Specific Features
 
 1. **Native macOS Support**
-   - Works on Apple Silicon (M1/M2/M3/M4)
+   - Works on Apple Silicon (M1/M2/M3/M4) and Intel-based Macs
    - Uses Metal Performance Shaders (MPS) for GPU acceleration
 
 2. **Optimized for macOS Performance**
@@ -39,6 +39,20 @@ This is a macOS-specific fork of StreamDiffusion, an innovative diffusion pipeli
    - Interactive img2img pipeline with webcam feed or screen capture
    - Support for prompt-based image manipulation
 
+## System Requirements
+
+- **macOS**: macOS 12.0 (Monterey) or newer recommended
+- **Hardware**: Apple Silicon (M1/M2/M3/M4) or Intel-based Mac
+- **Python**: Version 3.10 recommended
+- **Node.js & npm**: Required for building the demo frontend (install from [nodejs.org](https://nodejs.org/))
+- **Memory**: 16GB RAM minimum recommended for better performance
+
+## macOS Performance
+
+While not as fast as NVIDIA GPUs with TensorRT, this macOS port still provides interactive speeds.
+
+> Note: Performance may vary based on your specific Mac hardware, model settings, and image resolution.
+
 ## Installation
 
 ### Quick Start
@@ -48,7 +62,7 @@ For detailed installation instructions, see our [macOS Installation Guide](./INS
 ### Step 1: Clone this repository
 
 ```bash
-git clone https://github.com/yourusername/StreamDiffusion-Mac.git
+git clone https://github.com/patrickhartono/StreamDiffusion-Mac.git
 cd StreamDiffusion-Mac
 ```
 
@@ -78,19 +92,69 @@ pip install --pre torch torchvision
 pip install -e ".[macos]"
 ```
 
-## Running the Demo
+## Quick Start for macOS
 
-To run the realtime img2img demo:
+Here's a complete minimal example to get you started with StreamDiffusion on macOS:
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/patrickhartono/StreamDiffusion-Mac.git
+cd StreamDiffusion-Mac
+
+# 2. Set up Python environment (choose one)
+# Option A: With conda
+conda create -n streamdiffusion python=3.10
+conda activate streamdiffusion
+
+# Option B: With venv
+python -m venv .venv
+source .venv/bin/activate
+
+# 3. Install PyTorch for macOS
+pip install --pre torch torchvision
+
+# 4. Install StreamDiffusion
+pip install -e ".[macos]"
+
+# 5. Run the demo
 cd demo/realtime-img2img
+pip install -r requirements.txt
+cd frontend && npm i && npm run build && cd ..
 chmod +x run_mac.sh
 ./run_mac.sh
 ```
 
 Then open your browser at http://localhost:7860
 
-## Usage Example
+## Running the Demo
+
+To run the realtime img2img demo:
+
+```bash
+# Navigate to the demo directory
+cd demo/realtime-img2img
+
+# Install additional dependencies required for the demo
+pip install -r requirements.txt
+
+# Build the frontend (required the first time, needs Node.js/npm installed)
+cd frontend && npm i && npm run build && cd ..
+
+# Make the run script executable and run it
+chmod +x run_mac.sh
+./run_mac.sh
+```
+
+Then open your browser at http://localhost:7860
+
+### Demo Features
+
+- Real-time image generation from webcam or screen capture
+- Adjustable settings for generation quality and speed
+- Prompt-based image manipulation
+- Support for custom models
+
+For detailed instructions, see the [macOS-specific demo README](./demo/realtime-img2img/MACOS_README.md).
 
 Here's a simple example of how to use StreamDiffusion for image-to-image generation on macOS:
 
@@ -105,7 +169,7 @@ from streamdiffusion import StreamDiffusion
 from streamdiffusion.image_utils import postprocess_image
 
 # Load model with appropriate settings for macOS
-pipe = StableDiffusionPipeline.from_pretrained("KBlueLeaf/kohaku-v2.1").to(
+pipe = StableDiffusionPipeline.from_pretrained("stabilityai/sd-turbo").to(
     device=torch.device("mps" if torch.backends.mps.is_available() else "cpu"),
     dtype=torch.float16,
 )
@@ -127,7 +191,7 @@ prompt = "1girl with dog hair, thick frame glasses"
 # Prepare the stream
 stream.prepare(prompt)
 
-# Prepare image
+# Prepare image (included in the repository)
 init_image = load_image("assets/img2img_example.png").resize((512, 512))
 
 # Warmup >= len(t_index_list) x frame_buffer_size
@@ -170,6 +234,24 @@ Then open your browser at http://localhost:7860
 - Prompt-based image manipulation
 - Support for custom models
 
+### Required Models
+
+The demo automatically downloads the necessary models from Hugging Face, but if you want to use specific models:
+
+1. **SD-Turbo** (recommended for macOS): Used by default, provides faster performance
+   - Downloaded automatically from `stabilityai/sd-turbo`
+
+2. **KohakuV2** (optional): Can be used for higher quality outputs but slower
+   - Can be downloaded from [Hugging Face](https://huggingface.co/KBlueLeaf/kohaku-v2.1)
+   
+3. **LCM-LoRA** (optional): Automatically merged if the base model is not LCM
+   - Downloaded automatically from `latent-consistency/lcm-lora-sdv1-5`
+
+To use custom models, place them in the appropriate folders:
+- Base models: `models/Model/`
+- LoRA weights: `models/LoRA/`
+- LCM LoRA weights: `models/LCM_LoRA/`
+
 For detailed instructions, see the [macOS-specific demo README](./demo/realtime-img2img/MACOS_README.md).
 
 ## Troubleshooting macOS Issues
@@ -193,6 +275,11 @@ For detailed instructions, see the [macOS-specific demo README](./demo/realtime-
 4. **Prompt updates not taking effect**
    - This has been fixed in this fork by adding the `update_prompt` method to the StreamDiffusionWrapper class
 
+5. **SD-Turbo Model Variant Warning**
+   - You may see a warning message: `Some weights of the model checkpoint were not used...`
+   - This is normal and can be safely ignored
+   - The warning occurs because SD-Turbo has some structural differences from standard SD models
+
 ### Checking MPS Support
 
 To verify that your Mac supports MPS acceleration, run:
@@ -201,6 +288,26 @@ To verify that your Mac supports MPS acceleration, run:
 import torch
 print(f"MPS available: {torch.backends.mps.is_available()}")
 ```
+
+### Example of Successful Setup
+
+When everything is working correctly, you should see output similar to this when starting the demo:
+
+```
+Verifying Python environment...
+Using Python: Python 3.10.x
+Using pip: pip 23.x.x from ...
+
+Checking required libraries...
+PyTorch version: 2.x.x, CUDA available: False, MPS available: True
+
+PYTHONPATH set to: /Users/username/StreamDiffusion-Mac
+
+Starting StreamDiffusion with Mac-optimized settings...
+Running on local URL:  http://127.0.0.1:7860
+```
+
+The web interface should load and display controls for adjusting prompts, image settings, and generation parameters.
 
 ## Credits and Acknowledgments
 
@@ -216,6 +323,20 @@ The macOS compatibility fixes and this fork are maintained by [@patrickhartono](
 
 This project is licensed under the original StreamDiffusion license.
 
+## Development Team
+
+[Aki](https://twitter.com/cumulo_autumn),
+[Ararat](https://twitter.com/AttaQjp),
+[Chenfeng Xu](https://twitter.com/Chenfeng_X),
+[ddPn08](https://twitter.com/ddPn08),
+[kizamimi](https://twitter.com/ArtengMimi),
+[ramune](https://twitter.com/__ramu0e__),
+[teftef](https://twitter.com/hanyingcl),
+[Tonimono](https://twitter.com/toni_nimono),
+[Verb](https://twitter.com/IMG_5955),
+
+(\*alphabetical order)
+</br>
 
 ## Acknowledgements
 

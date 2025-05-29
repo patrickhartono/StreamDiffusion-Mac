@@ -162,6 +162,11 @@ class Pipeline:
             raise
 
         self.last_prompt = default_prompt
+        self.negative_prompt = default_negative_prompt
+        
+        # Store the negative prompt in the wrapper object
+        if hasattr(self.stream, 'negative_prompt'):
+            self.stream.negative_prompt = default_negative_prompt
         
         # Enhanced preparation for Mac
         if device.type == 'mps':

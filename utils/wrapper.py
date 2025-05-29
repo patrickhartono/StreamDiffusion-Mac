@@ -146,6 +146,10 @@ class StreamDiffusionWrapper:
             else frame_buffer_size
         )
 
+        # Initialize prompt-related attributes
+        self.prompt = ""
+        self.negative_prompt = ""
+        
         self.use_denoising_batch = use_denoising_batch
         self.use_safety_checker = use_safety_checker
 
@@ -672,5 +676,9 @@ class StreamDiffusionWrapper:
             The new prompt to set.
         """
         print(f"Prompt updated to: {prompt}")
-        # Placeholder for actual prompt update logic
         self.prompt = prompt
+        
+        # Update the prompt in the underlying StreamDiffusion object
+        if hasattr(self, 'stream') and self.stream is not None:
+            # Use the stored negative_prompt or empty string if not set
+            self.stream.prepare(prompt, self.negative_prompt)

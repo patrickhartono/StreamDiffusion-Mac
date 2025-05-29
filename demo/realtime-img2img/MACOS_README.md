@@ -47,13 +47,31 @@ This patch adds macOS compatibility to the StreamDiffusion image-to-image applic
 
 ## Requirements for macOS
 
-- Python 3.9+ recommended
+- Python 3.10+ recommended (tested and verified with Python 3.10)
 - PyTorch 2.0+ with MPS support
+- Node.js and npm for building the frontend
 - Updated dependencies as specified in requirements.txt:
   - diffusers==0.33.1
   - huggingface_hub==0.32.1
   - accelerate==1.7.0
 - streamdiffusion installed as a local package
+
+## Performance Tips for macOS
+
+1. **Choose the right model**:
+   - SD-Turbo is recommended for better performance on macOS
+   - Avoid larger models that might cause memory issues
+
+2. **Optimize memory usage**:
+   - Use TinyVAE/TAESD with the `--taesd` flag
+   - Keep batch size at 1
+   - Use smaller resolutions (256x256 or 512x512)
+   - Close other GPU-intensive applications
+
+3. **Metal Performance**:
+   - Ensure your macOS is updated to the latest version
+   - Use a MacBook with adequate cooling or in a cool environment
+   - Connect to power when running intensive generation sessions
 
 ## Troubleshooting
 

@@ -7,14 +7,15 @@ This guide provides detailed instructions for installing StreamDiffusion on macO
 - **macOS**: macOS 12.0 (Monterey) or newer recommended
 - **Apple Silicon** (M1/M2/M3/M4) or **Intel-based Mac**
 - **Python**: Version 3.10 recommended
-- **Memory**: 24GB minimum, 64GB recommended for better performance
+- **Node.js & npm**: Required for building the frontend (for the img2img demo)
+- **Memory**: 16GB minimum recommended for better performance
 
 ## Installation Steps
 
 ### Step 1: Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/StreamDiffusion-Mac.git
+git clone https://github.com/patrickhartono/StreamDiffusion-Mac.git
 cd StreamDiffusion-Mac
 ```
 
@@ -64,6 +65,12 @@ python -c "import torch; print(f'PyTorch version: {torch.__version__}, MPS avail
 # Navigate to the demo directory
 cd demo/realtime-img2img
 
+# Install additional dependencies required for the demo
+pip install -r requirements.txt
+
+# Build the frontend (required the first time, needs Node.js/npm installed)
+cd frontend && npm i && npm run build && cd ..
+
 # Make the run script executable
 chmod +x run_mac.sh
 
@@ -72,6 +79,18 @@ chmod +x run_mac.sh
 ```
 
 Then open your browser at http://localhost:7860
+
+### Models for the Demo
+
+The demo will automatically download these models from Hugging Face:
+
+1. **SD-Turbo** (recommended): `stabilityai/sd-turbo`
+2. **LCM-LoRA** (optional): `latent-consistency/lcm-lora-sdv1-5`
+
+For custom models, place them in these directories:
+- Base models: `models/Model/`
+- LoRA weights: `models/LoRA/`
+- LCM LoRA weights: `models/LCM_LoRA/`
 
 ## Advanced Configuration
 
@@ -141,6 +160,10 @@ stream = StreamDiffusion(
    npm run build
    ```
 
+6. **Node.js/npm not found**:
+   - If you see "command not found: npm", install Node.js from [nodejs.org](https://nodejs.org/)
+   - For Homebrew users: `brew install node`
+
 ### Debug Mode
 
 To see detailed error messages, add the `--debug` flag:
@@ -149,9 +172,34 @@ To see detailed error messages, add the `--debug` flag:
 python main.py --taesd --acceleration none --debug
 ```
 
-For more detailed troubleshooting, see the [macOS-specific demo README](./demo/realtime-img2img/MACOS_README.md).
-# Or use the provided script:
-./run_mac.sh
+### Expected Successful Output
+
+When everything is working correctly, you should see output similar to this:
+
+```
+Verifying Python environment...
+Using Python: Python 3.10.x
+Using pip: pip 23.x.x from ...
+
+Checking required libraries...
+PyTorch version: 2.x.x, CUDA available: False, MPS available: True
+
+PYTHONPATH set to: /Users/username/StreamDiffusion-Mac
+
+Starting StreamDiffusion with Mac-optimized settings...
+Running on local URL:  http://127.0.0.1:7860
 ```
 
-Then open your browser at http://localhost:7860
+## Automated Validation
+
+This repository includes a GitHub Actions workflow that automatically validates the core functionality on macOS. The workflow:
+
+1. Installs dependencies on a macOS runner
+2. Verifies PyTorch MPS support
+3. Tests importing the StreamDiffusion modules
+4. Builds the frontend for the demo
+5. Tests basic model initialization and setup
+
+You can view the latest validation runs in the GitHub Actions tab of the repository.
+
+For more detailed troubleshooting, see the [macOS-specific demo README](./demo/realtime-img2img/MACOS_README.md).
