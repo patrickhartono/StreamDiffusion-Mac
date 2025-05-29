@@ -12,7 +12,6 @@ It has been specifically modified to work on **macOS**, supporting both Apple Si
 
 <p align="center">
   <img src="./assets/demo_07.gif" width=90%>
-  <img src="./assets/demo_09.gif" width=90%>
 </p>
 
 # StreamDiffusion for macOS: Real-Time Interactive Generation
@@ -25,7 +24,7 @@ This is a macOS-specific fork of StreamDiffusion, an innovative diffusion pipeli
 ## macOS-Specific Features
 
 1. **Native macOS Support**
-   - Works on Apple Silicon (M1/M2/M3/m4) and Intel-based Macs
+   - Works on Apple Silicon (M1/M2/M3/M4)
    - Uses Metal Performance Shaders (MPS) for GPU acceleration
 
 2. **Optimized for macOS Performance**
@@ -217,82 +216,6 @@ The macOS compatibility fixes and this fork are maintained by [@patrickhartono](
 
 This project is licensed under the original StreamDiffusion license.
 
-## Optionals
-
-### Stochastic Similarity Filter
-
-![demo](assets/demo_06.gif)
-
-Stochastic Similarity Filter reduces processing during video input by minimizing conversion operations when there is little change from the previous frame, thereby alleviating GPU processing load, as shown by the red frame in the above GIF. The usage is as follows:
-
-```python
-stream = StreamDiffusion(
-    pipe,
-    [32, 45],
-    torch_dtype=torch.float16,
-)
-stream.enable_similar_image_filter(
-    similar_image_filter_threshold,
-    similar_image_filter_max_skip_frame,
-)
-```
-
-There are the following parameters that can be set as arguments in the function:
-
-#### `similar_image_filter_threshold`
-
-- The threshold for similarity between the previous frame and the current frame before the processing is paused.
-
-#### `similar_image_filter_max_skip_frame`
-
-- The maximum interval during the pause before resuming the conversion.
-
-### Residual CFG (RCFG)
-
-![rcfg](assets/cfg_conparision.png)
-
-RCFG is a method for approximately realizing CFG with competitive computational complexity compared to cases where CFG is not used. It can be specified through the cfg_type argument in the StreamDiffusion. There are two types of RCFG: one with no specified items for negative prompts RCFG Self-Negative and one where negative prompts can be specified RCFG Onetime-Negative. In terms of computational complexity, denoting the complexity without CFG as N and the complexity with a regular CFG as 2N, RCFG Self-Negative can be computed in N steps, while RCFG Onetime-Negative can be computed in N+1 steps.
-
-The usage is as follows:
-
-```python
-# w/0 CFG
-cfg_type = "none"
-# CFG
-cfg_type = "full"
-# RCFG Self-Negative
-cfg_type = "self"
-# RCFG Onetime-Negative
-cfg_type = "initialize"
-stream = StreamDiffusion(
-    pipe,
-    [32, 45],
-    torch_dtype=torch.float16,
-    cfg_type=cfg_type,
-)
-stream.prepare(
-    prompt="1girl, purple hair",
-    guidance_scale=guidance_scale,
-    delta=delta,
-)
-```
-
-The delta has a moderating effect on the effectiveness of RCFG.
-
-## Development Team
-
-[Aki](https://twitter.com/cumulo_autumn),
-[Ararat](https://twitter.com/AttaQjp),
-[Chenfeng Xu](https://twitter.com/Chenfeng_X),
-[ddPn08](https://twitter.com/ddPn08),
-[kizamimi](https://twitter.com/ArtengMimi),
-[ramune](https://twitter.com/__ramu0e__),
-[teftef](https://twitter.com/hanyingcl),
-[Tonimono](https://twitter.com/toni_nimono),
-[Verb](https://twitter.com/IMG_5955),
-
-(\*alphabetical order)
-</br>
 
 ## Acknowledgements
 
