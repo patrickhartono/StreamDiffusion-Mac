@@ -4,11 +4,11 @@
 This repository is a **modified version** of the original [StreamDiffusion](https://github.com/cumulo-autumn/StreamDiffusion) project.  
 I adapted and patched the code to enable **macOS support**, including both Apple Silicon (M1/M2) and Intel-based Macs.  
   
- 🔧 **Current limitation:** Only the **img2img** pipeline has been tested and verified to work on macOS. The txt2img demo is not yet supported.  
+🔧 **Current limitation:** Only the **img2img** pipeline has been tested and verified to work on macOS. The txt2img demo is not yet supported.  
   
- ➕ If you're using macOS and want to try StreamDiffusion natively, start here.  
- - See [macOS installation guide](./INSTALL.md#macos-apple-silicon)  
- - See [macOS-specific demo instructions](./demo/realtime-img2img/MACOS_README.md)
+➕ If you're using macOS and want to try StreamDiffusion natively, start here.  
+- See [macOS installation guide](./INSTALL.md#macos-apple-silicon)  
+- See [macOS-specific demo instructions](./demo/realtime-img2img/MACOS_README.md)
 
 
 [English](./README.md) | [日本語](./README-ja.md) | [한국어](./README-ko.md)
